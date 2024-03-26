@@ -26,7 +26,7 @@ nest = {
     ]
 }
 
-def dict_to_xmind(file, dict, level):
+def xmind_to_markdown(file, dict, level):
     # dict contains as shown above in "nest"
     # level is going to be the level of indentation
     # within a topic, if there are topics, there's a nest
@@ -36,13 +36,13 @@ def dict_to_xmind(file, dict, level):
         str_to_write = f"# {dict['title']}\n"
         print(str_to_write)
         file.write(str_to_write)
-        dict_to_xmind(file, dict["topic"], level + 1)
+        xmind_to_markdown(file, dict["topic"], level + 1)
     elif "topics" in dict.keys():
         str_to_write = f"{'#' * level} {dict['title']}\n"
         print(str_to_write)
         file.write(str_to_write)
         for topic in dict["topics"]:
-            dict_to_xmind(file, topic, level + 1)
+            xmind_to_markdown(file, topic, level + 1)
     else:
         # We don't have any keys, and it's just a title, which we write as a singular list
         str_to_write = f"- {dict['title']}\n"
@@ -51,4 +51,4 @@ def dict_to_xmind(file, dict, level):
 
 if __name__ == "__main__":
     with open("output.md", "w+") as f:
-        dict_to_xmind(f, d[0], 0)
+        xmind_to_markdown(f, d[0], 0)
