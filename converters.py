@@ -1,5 +1,5 @@
-from xmindparser import xmind_to_dict
-
+import xmind
+import json
 
 def xmind_to_markdown(dict, file_handle, indentation, start_bullets=3):
     """
@@ -34,6 +34,6 @@ def xmind_to_markdown(dict, file_handle, indentation, start_bullets=3):
 if __name__ == "__main__":
     # Test the xmind to markdown method
     test_file = "test_docs/Chapter 3 - The Basic Tools.xmind"
-    xmind_dict = xmind_to_dict(test_file)
+    xmind_dict = json.loads(xmind.load(test_file).to_prettify_json())[0]
     with open("xmind_converted.md", "w+") as output_file:
-        xmind_to_markdown(xmind_dict[0], output_file, 0)
+        xmind_to_markdown(xmind_dict, output_file, 0)
