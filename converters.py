@@ -31,9 +31,30 @@ def xmind_to_markdown(dict, file_handle, indentation, start_bullets=3):
             for topic in dict["topics"]:
                 xmind_to_markdown(topic, file_handle, indentation + 1)
 
+
+def remove_keys(dictionary, keys_to_remove = ['id', 'link', 'note', 'label', 'comment', 'markers'] ):
+    """
+    A method to remove unused keys that xmind provides in it's dict
+    We have this so we can check content between conversions.
+    I.e. 
+        xmind -> dict -> mdown
+        mdown -> dict -> xmind
+    The dicts should be equal.
+    """
+    if isinstance(dictionary, dict):
+        for k, v in list(dictionary.items()):
+            if k in keys_to_remove:
+                del dictionary[k]
+            else:
+                remove_keys(v, keys_to_remove)
+    elif isinstance(dictionary, list):
+        for item in dictionary:
+            remove_keys(item, keys_to_remove)
+
 if __name__ == "__main__":
     # Test the xmind to markdown method
     test_file = "test_docs/Chapter 3 - The Basic Tools.xmind"
     xmind_dict = json.loads(xmind.load(test_file).to_prettify_json())[0]
-    with open("xmind_converted.md", "w+") as output_file:
+    remove_keys(xmind_dict)
+    with open("xmind_converted_new_dict.md", "w+") as output_file:
         xmind_to_markdown(xmind_dict, output_file, 0)
