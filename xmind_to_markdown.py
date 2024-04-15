@@ -1,7 +1,23 @@
-import xmind
-import json
+"""
 
-def dict_to_markdown(dict, file_handle, indentation, start_bullets=3):
+"""
+
+import json
+import xmind
+
+
+def get_xmind_dict(file):
+    xmind_dict = json.loads(xmind.load(test_file).to_prettify_json())[0]
+    remove_keys(xmind_dict)
+    return xmind_dict
+
+
+def dict_to_markdown(outfile, dict):
+    with open(outfile, "w+") as output_file:
+        add_md_entry(output_file, dict, 0)
+
+
+def add_md_entry(file_handle, dict, indentation, start_bullets=3):
     """
     Writes an xmind dict to a file_handle.
     dict          : The xmind dictionary, created using the xmindparser library
@@ -13,7 +29,7 @@ def dict_to_markdown(dict, file_handle, indentation, start_bullets=3):
     if "topic" in dict.keys():
         # This is the title. In most of my books, I don't use this.
         # TODO: Add a check here to see if the name is set.
-        dict_to_markdown(dict["topic"], file_handle, indentation + 1)
+        add_md_entry(file_handle, dict["topic"], indentation + 1)
     elif "topics" in dict.keys() and indentation < start_bullets:
         # This is a header
         # If a header has a newline, replace the newline with a dash
@@ -22,17 +38,17 @@ def dict_to_markdown(dict, file_handle, indentation, start_bullets=3):
         str_to_write = f"\n{'#' * indentation} {header_str}\n"
         file_handle.write(str_to_write)
         for topic in dict["topics"]:
-            dict_to_markdown(topic, file_handle, indentation + 1)
+            add_md_entry(file_handle, topic, indentation + 1)
     else:
         # If there's a bullet point with a number, we prevent the auto-formatting of markdown's numbered list
         str_to_write = f"{'    ' * (indentation - start_bullets)}- {dict['title']}\n"
         file_handle.write(str_to_write.replace(".", "\."))
         if "topics" in dict.keys():
             for topic in dict["topics"]:
-                dict_to_markdown(topic, file_handle, indentation + 1)
+                add_md_entry(file_handle, topic, indentation + 1)
 
 
-def remove_keys(dictionary, keys_to_remove = ['id', 'link', 'note', 'label', 'comment', 'markers'] ):
+def remove_keys(dictionary, keys_to_remove=['id', 'link', 'note', 'label', 'comment', 'markers']):
     """
     A method to remove unused keys that xmind provides in it's dict
     We have this so we can check content between conversions.
@@ -51,10 +67,8 @@ def remove_keys(dictionary, keys_to_remove = ['id', 'link', 'note', 'label', 'co
         for item in dictionary:
             remove_keys(item, keys_to_remove)
 
+
 if __name__ == "__main__":
-    # Test the xmind to markdown method
     test_file = "test_docs/Chapter 3 - The Basic Tools.xmind"
-    xmind_dict = json.loads(xmind.load(test_file).to_prettify_json())[0]
-    remove_keys(xmind_dict)
-    with open("xmind_converted_new_dict.md", "w+") as output_file:
-        dict_to_markdown(xmind_dict, output_file, 0)
+    xmind_dict = get_xmind_dict(test_file)
+    dict_to_markdown("out_test.md", xmind_dict)
